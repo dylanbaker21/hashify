@@ -18,7 +18,7 @@ class App extends Component {
 
   componentDidMount() {
     axios
-      .get("http://localhost:3001/api/getData")
+      .get("/api/getData")
       .then(res => this.setState({ hashItems: res.data }));
   }
   // Add Hash
@@ -33,7 +33,7 @@ class App extends Component {
       tx: null
     };
     axios
-      .post("http://localhost:3001/api/putData", { newHashItem })
+      .post("/api/putData", { newHashItem })
       .then(res => this.setState({ hashItems: res.data }));
   };
 
@@ -41,7 +41,7 @@ class App extends Component {
   deleteHash = id => {
     console.log(id);
     axios
-      .delete(`http://localhost:3001/api/deleteData${id}`)
+      .delete(`/api/deleteData${id}`)
       .then(res => this.setState({ hashItems: res.data }));
   };
 
@@ -68,7 +68,7 @@ class App extends Component {
           tx: result
         };
         axios
-          .post("http://localhost:3001/api/updateData", updateHashItem)
+          .post("/api/updateData", updateHashItem)
           .then(res => this.setState({ hashItems: res.data }));
         setTimeout(() => {
           window.location.reload();
