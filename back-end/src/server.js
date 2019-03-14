@@ -24,6 +24,14 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 
 // (optional) only made for logging and
 // bodyParser, parses the request body to be a readable json format
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept"
+  );
+  next();
+});
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(logger("dev"));
