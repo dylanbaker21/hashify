@@ -1,3 +1,5 @@
+# cd hashify and run `npm start` to run server and front end
+
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
 ## Available Scripts
