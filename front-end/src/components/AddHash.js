@@ -1,6 +1,7 @@
 import React, { Component } from "react";
 import PropTypes from "prop-types";
 
+// this class takes a text pre-image as input and outputs the hash
 export class AddHash extends Component {
   state = {
     input: ""

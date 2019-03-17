@@ -16,63 +16,84 @@ class App extends Component {
     hashItems: []
   };
 
+  // when component mounts get all hash items and set to state
   componentDidMount() {
     axios
-      .get("/api/getData")
+      .get("http://localhost:3001/api/getData")
       .then(res => this.setState({ hashItems: res.data }));
   }
-  // Add Hash
+
+  // take text input and output the hash
   addHash = input => {
+    // hash the input and set output to state
     let output = keccak256(input);
     this.setState({ output });
 
+    // create a hash item
     const newHashItem = {
       id: uuid.v4(),
       hash: output,
       fromAddress: null,
       tx: null
     };
+
+    // post hash item to database and set the return value (all items) to state
     axios
-      .post("/api/putData", { newHashItem })
+      .post("http://localhost:3001/api/putData", { newHashItem })
       .then(res => this.setState({ hashItems: res.data }));
   };
 
-  //Delete Hash
+  // takes hash item id (id we create with uuid not database _id)
+  // and deletes from database then updates state
   deleteHash = id => {
     console.log(id);
     axios
-      .delete(`/api/deleteData${id}`)
+      .delete(`http://localhost:3001/api/deleteData${id}`)
       .then(res => this.setState({ hashItems: res.data }));
   };
 
+  // sends a hash item to the ethereum blockchain and updates db
   hashToBlock = (output, id) => {
+    // pass in contract ABI and address to create instance
     const contract = window.web3.eth.contract(HASHIFY_ABI).at(HASHIFY_ADDRESS);
 
+    // get first address in metamask account
     let acct = window.web3.eth.coinbase;
     console.log("Sending from account: " + acct);
     console.log("Hash being sent: " + output);
 
+    // prepend 0x to the hash as per ethereum formatting
     let formatOutput = "0x" + output;
+
+    // if no account found tell user to login to metamask
     if (acct == null) {
       window.alert(
         'You must login to the chrome extension "metamask" to interact with the blockchain'
       );
-    } else {
+    }
+    // if account found submit hash to contract and update database
+    else {
+      // calling smart contract function
       contract.addHash(formatOutput, (error, result) => {
         if (!error) {
           console.log("Tx: " + result);
+
+          // create hash item update with ethereum fromAddress and tx hash
+          const updateHashItem = {
+            id: id,
+            fromAddress: acct,
+            tx: result
+          };
+
+          // update database then set state and refresh page after 2 seconds
+          // TODO: fix refresh page issue and have it auto update state
+          axios
+            .post("http://localhost:3001/api/updateData", updateHashItem)
+            .then(res => this.setState({ hashItems: res.data }));
+          setTimeout(() => {
+            window.location.reload();
+          }, 2000);
         }
-        const updateHashItem = {
-          id: id,
-          fromAddress: acct,
-          tx: result
-        };
-        axios
-          .post("/api/updateData", updateHashItem)
-          .then(res => this.setState({ hashItems: res.data }));
-        setTimeout(() => {
-          window.location.reload();
-        }, 2000);
       });
     }
   };

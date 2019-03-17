@@ -2,16 +2,18 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import SubmitHash from "./SubmitHash";
 
+// this class handles the display/properties of
+// the individual hash items created in Hashes.js
 export class HashItem extends Component {
   getStyle = () => {
     return {
       background: "#f4f4f4",
       padding: "10px",
       borderBottom: "1px #ccc dotted"
-      //textDecoration: this.props.todo.completed ? "line-through" : "none"
     };
   };
 
+  // links to the etherscan transaction of a submitted hash
   etherscanPortal = () => {
     window.open(`https://ropsten.etherscan.io/tx/${this.props.tx}`);
   };
@@ -27,11 +29,12 @@ export class HashItem extends Component {
         <p>
           <b>Keccak256 Hash:</b> {this.props.hash}
         </p>
-        {this.props.tx !== null ? (
-          <button style={btnStyle} onClick={this.etherscanPortal}>
+        {this.props.tx !== null ? ( //if there's a tx show etherscan button
+          <button style={etherscanBtnStyle} onClick={this.etherscanPortal}>
             View on Etherscan
           </button>
         ) : (
+          //else no tx then show button to submit to blockchain
           <SubmitHash
             hashToBlock={this.props.hashToBlock}
             id={this.props.id}
@@ -39,7 +42,7 @@ export class HashItem extends Component {
           />
         )}
         <button
-          style={btnStyle2}
+          style={delBtnStyle}
           onClick={this.props.deleteHash.bind(this, this.props.id)}
         >
           Delete Hash
@@ -59,7 +62,7 @@ HashItem.propTypes = {
   hashToBlock: PropTypes.func.isRequired
 };
 
-const btnStyle = {
+const etherscanBtnStyle = {
   background: "#0022DE",
   color: "#fff",
   border: "none",
@@ -69,7 +72,7 @@ const btnStyle = {
   float: "middle"
 };
 
-const btnStyle2 = {
+const delBtnStyle = {
   background: "#8B0000",
   color: "#fff",
   border: "none",
