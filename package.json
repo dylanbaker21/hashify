@@ -4,20 +4,21 @@
   "description": "",
   "main": "index.js",
   "dependencies": {
+    "axios": "^0.18.0",
     "body-parser": "^1.18.3",
+    "concurrently": "^4.1.0",
     "cors": "^2.8.5",
     "express": "^4.16.4",
+    "fsevents": "^1.2.7",
+    "js-sha3": "^0.8.0",
     "mongoose": "^5.4.19",
     "morgan": "^1.9.1",
     "nodemon": "^1.18.10",
-    "axios": "^0.18.0",
-    "js-sha3": "^0.8.0",
     "react": "^16.8.4",
     "react-dom": "^16.8.4",
     "react-router-dom": "^4.3.1",
     "react-scripts": "2.1.8",
-    "uuid": "^3.3.2",
-    "concurrently": "^4.1.0"
+    "uuid": "^3.3.2"
   },
   "devDependencies": {},
   "scripts": {
