@@ -10,3 +10,4 @@ To run smart contract analysis/tests `cd smart-contract` and do the following
 This starts the backend server and links to database, opens the frontend client in the browser
 
 ![static analysis](static-analysis.png)
+![test coverage](test-coverage.png)
