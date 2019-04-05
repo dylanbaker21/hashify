@@ -1,9 +1,9 @@
-pragma solidity ^0.5.0;
+pragma solidity 0.5.0;
 
 contract Register {
     
     address public owner;
-    address[] versions;
+    address[] public versions;
     
     constructor() public {
         owner = msg.sender;
@@ -15,12 +15,8 @@ contract Register {
     }
     
     function getLatestVersion() public view returns(address) {
-        uint256 _index = versions.length-1;
-        return versions[_index];
-    }
-    
-    function getPastVersion(uint256 _index) public view returns(address) {
-        return versions[_index];
+        require(versions.length >= 1);
+        return versions[versions.length-1];
     }
     
     function requireContract(address _versionAddress) private view returns (bool isContract) {
@@ -35,11 +31,9 @@ contract Register {
 
 contract Proxy {
 
-    address owner;
-    Register reg;
+    Register internal reg;
 
     constructor(address _register) public {
-        owner = msg.sender;
         reg = Register(address(_register)); //pass in address of version register
     }
     
