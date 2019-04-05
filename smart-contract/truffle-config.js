@@ -44,6 +44,14 @@ module.exports = {
     // tab if you use this network and you must also set the `host`, `port` and `network_id`
     // options below to some value.
     //
+    // coverage: {
+    //   norpc: true,
+    //   host: "127.0.0.1",
+    //   network_id: "*",
+    //   port: 8545, // <-- If you change this, also set the port option in .solcover.js.
+    //   gas: 0xfffffffffff, // <-- Use this high gas value
+    //   gasPrice: 0x01 // <-- Use this low gas price
+    // },
     development: {
       host: "127.0.0.1", // Localhost (default: none)
       port: 8545, // Standard Ethereum port (default: none)
@@ -87,7 +95,7 @@ module.exports = {
   // Configure your compilers
   compilers: {
     solc: {
-      // version: "0.5.1",    // Fetch exact version from solc-bin (default: truffle's version)
+      version: "0.5.0" // Fetch exact version from solc-bin (default: truffle's version)
       // docker: true,        // Use "0.5.1" you've installed locally with docker (default: false)
       // settings: {          // See the solidity docs for advice about optimization and evmVersion
       //  optimizer: {
