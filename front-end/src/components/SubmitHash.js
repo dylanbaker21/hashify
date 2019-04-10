@@ -32,7 +32,7 @@ const submitBtnStyle = {
   backgroundColor: "#008100",
   color: "#fff",
   height: "5vh",
-  width: "25vw",
+  display: "inline-block",
   cursor: "pointer",
   margin: "1vw"
 };
