@@ -1,0 +1,13 @@
+.metamask {
+  height: auto;
+  width: 200px;
+  position: absolute;
+  right: 5%;
+  top: 3%;
+}
+
+@media screen and (max-width: 600px) {
+  .metamask {
+    display: none;
+  }
+}
