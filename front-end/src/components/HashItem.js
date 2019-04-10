@@ -26,7 +26,7 @@ export class HashItem extends Component {
   render() {
     return (
       <div style={this.getStyle()}>
-        <p>
+        <p style={{ wordWrap: "break-word" }}>
           <b>Keccak256 Hash:</b> {this.props.hash}
         </p>
         {this.props.tx !== null ? ( //if there's a tx show etherscan button
