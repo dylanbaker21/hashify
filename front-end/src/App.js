@@ -7,7 +7,7 @@ import Hashes from "./components/Hashes";
 import uuid from "uuid";
 import axios from "axios";
 import { keccak256 } from "js-sha3";
-import { HASHIFY_ABI, HASHIFY_ADDRESS } from "./ContractData";
+import { HASHIFY_ABI, PROXY_ADDRESS } from "./ContractData";
 import "./App.css";
 
 class App extends Component {
@@ -53,12 +53,14 @@ class App extends Component {
   };
 
   // sends a hash item to the ethereum blockchain and updates db
-  hashToBlock = (output, id) => {
+  hashToBlock = async (output, id) => {
     // pass in contract ABI and address to create instance
-    const contract = window.web3.eth.contract(HASHIFY_ABI).at(HASHIFY_ADDRESS);
+    const contract = window.web3.eth.contract(HASHIFY_ABI).at(PROXY_ADDRESS);
 
     // get first address in metamask account
     let acct = window.web3.eth.coinbase;
+    let netId = await window.web3.version.network;
+    console.log(netId);
     console.log("Sending from account: " + acct);
     console.log("Hash being sent: " + output);
 
@@ -70,6 +72,8 @@ class App extends Component {
       window.alert(
         'You must login to the chrome extension "metamask" to interact with the blockchain'
       );
+    } else if (netId !== "3") {
+      window.alert("You must select the Ropsten test network in metamask");
     }
     // if account found submit hash to contract and update database
     else {
