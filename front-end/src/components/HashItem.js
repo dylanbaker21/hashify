@@ -45,7 +45,7 @@ export class HashItem extends Component {
           style={delBtnStyle}
           onClick={this.props.deleteHash.bind(this, this.props.id)}
         >
-          Delete Hash
+          Delete
         </button>
       </div>
     );
@@ -66,20 +66,24 @@ const etherscanBtnStyle = {
   background: "#0022DE",
   color: "#fff",
   border: "none",
-  padding: "5px 10px",
-  margin: "0px 0px 0px 20px",
+  borderRadius: "5px",
+  padding: "10px",
+  margin: "0px 0px 10px 10px",
   cursor: "pointer",
-  float: "middle"
+  float: "middle",
+  fontSize: "14px"
 };
 
 const delBtnStyle = {
   background: "#8B0000",
   color: "#fff",
   border: "none",
-  padding: "5px 10px",
-  margin: "0px 0px 0px 20px",
+  borderRadius: "5px",
+  padding: "10px",
+  margin: "0px 0px 10px 10px",
   cursor: "pointer",
-  float: "middle"
+  float: "middle",
+  fontSize: "14px"
 };
 
 export default HashItem;
