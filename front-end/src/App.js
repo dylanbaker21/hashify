@@ -1,9 +1,11 @@
 import React, { Component } from "react";
-import { BrowserRouter as Router, Route } from "react-router-dom";
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 import Header from "./components/layout/Header";
 import About from "./components/pages/About";
 import AddHashes from "./components/AddHash";
 import Hashes from "./components/Hashes";
+import Login from "./components/pages/Login";
+import Page404 from "./components/pages/Page404";
 import uuid from "uuid";
 import axios from "axios";
 import { keccak256 } from "js-sha3";
@@ -31,10 +33,12 @@ class App extends Component {
 
     // create a hash item
     const newHashItem = {
-      id: uuid.v4(),
-      hash: output,
-      fromAddress: null,
-      tx: null
+      //publicAddress: "0x3f040ef68e211d265a705f2066a33756c938615f",
+      hashes: {
+        id: uuid.v4(),
+        hash: output,
+        tx: null
+      }
     };
 
     // post hash item to database and set the return value (all items) to state
@@ -107,26 +111,29 @@ class App extends Component {
       <Router>
         <div className="App">
           <div className="container">
-            <Header />
-            <Route
-              exact
-              path="/"
-              render={props => (
-                <React.Fragment>
-                  <AddHashes
-                    addHash={this.addHash}
-                    output={this.state.output}
-                  />
-                  <Hashes
-                    hashItems={this.state.hashItems}
-                    output={this.state.output}
-                    hashToBlock={this.hashToBlock}
-                    deleteHash={this.deleteHash}
-                  />
-                </React.Fragment>
-              )}
-            />
-            <Route path="/about" component={About} />
+            <Switch>
+              <Route
+                path="/home"
+                render={props => (
+                  <React.Fragment>
+                    <Header />
+                    <AddHashes
+                      addHash={this.addHash}
+                      output={this.state.output}
+                    />
+                    <Hashes
+                      hashItems={this.state.hashItems}
+                      output={this.state.output}
+                      hashToBlock={this.hashToBlock}
+                      deleteHash={this.deleteHash}
+                    />
+                  </React.Fragment>
+                )}
+              />
+              <Route exact path="/" component={Login} />
+              <Route path="/about" component={About} />
+              <Route component={Page404} />
+            </Switch>
           </div>
         </div>
       </Router>
