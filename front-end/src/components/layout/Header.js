@@ -14,7 +14,7 @@ export default function Header() {
         />
       </a>
       <h1>Hashify</h1>
-      <Link style={linkStyle} to="/">
+      <Link style={linkStyle} to="/home">
         Home
       </Link>{" "}
       |{" "}
