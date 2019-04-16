@@ -66,6 +66,25 @@ router.get("/getData:publicAddress", (req, res) => {
   });
 });
 
+// fetches HASHES
+router.get("/getHashes:publicAddress", verifyToken, (req, res) => {
+  jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      let pubAddy = req.params.publicAddress;
+      console.log(pubAddy);
+      db.collection("users").findOne(
+        { publicAddress: pubAddy },
+        (err, data) => {
+          if (err) return res.json({ success: false, error: err });
+          return res.json(data);
+        }
+      );
+    }
+  });
+});
+
 // overwrites existing data in our database
 router.post("/updateData", (req, res) => {
   let id1 = req.body.id;
@@ -95,15 +114,53 @@ router.post("/updateData", (req, res) => {
 });
 
 // this method removes existing data from the database
-router.delete("/deleteData:id", (req, res) => {
-  let id2 = req.params.id;
-  console.log("Item with id to delete: " + id2);
-  Data.findOneAndDelete({ id: id2 }, err => {
-    if (err) return res.send(err);
-    Data.find((err, data) => {
-      if (err) return res.json({ success: false, error: err });
-      return res.json(data);
-    });
+router.delete("/deleteHash", verifyToken, (req, res) => {
+  jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      let hashID = req.body.id;
+      let address = req.body.address;
+      console.log("Item with id to delete" + req.body.id);
+      console.log("Address" + req.body.id);
+      db.collection("users").updateOne(
+        { publicAddress: address },
+        { $pull: { hashes: { id: hashID } } },
+        (err, data) => {
+          if (err) return res.json({ success: false, error: err });
+          return res.json(data);
+        }
+      );
+    }
+  });
+});
+
+// adds new hash to the database
+// ADD NEW HASH
+router.post("/putHash", verifyToken, (req, res) => {
+  jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      pubAddy = req.body.newHashItem.publicAddress;
+      hash = req.body.newHashItem.hash;
+      id = req.body.newHashItem.id;
+
+      console.log(pubAddy + " " + hash + " " + id);
+
+      db.collection("users").findOneAndUpdate(
+        { publicAddress: pubAddy },
+        { $push: { hashes: { id, hash, tx: null } } },
+        { new: true },
+        (err, data) => {
+          if (err) {
+            return res.json({ success: false, error: err });
+          } else {
+            return res.json(data);
+          }
+        }
+      );
+    }
   });
 });
 
@@ -212,6 +269,7 @@ router.post("/test", verifyToken, (req, res) => {
 
 function verifyToken(req, res, next) {
   // get auth header value
+  //console.log(req.headers);
   const bearerHeader = req.headers["authorization"];
 
   if (typeof bearerHeader !== "undefined") {
@@ -219,8 +277,10 @@ function verifyToken(req, res, next) {
     const bearer = bearerHeader.split(" ");
     //get token from array
     const bearerToken = bearer[1];
+    //console.log(bearerToken);
     //set token
     req.token = bearerToken;
+    //console.log(req.token);
     //next middleware
     next();
   } else {
