@@ -30,5 +30,18 @@
   padding: 10px;
   cursor: pointer;
   font-size: 20px;
-  /* text-shadow: 1px 1px 3px #fff; */
+}
+
+.metamask {
+  height: auto;
+  width: 200px;
+  position: absolute;
+  left: 5%;
+  top: 3%;
+}
+
+@media screen and (max-width: 600px) {
+  .metamask {
+    display: none;
+  }
 }
