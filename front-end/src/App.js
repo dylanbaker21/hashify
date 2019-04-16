@@ -18,12 +18,30 @@ class App extends Component {
     hashItems: []
   };
 
-  // when component mounts get all hash items and set to state
   componentDidMount() {
-    axios
-      .get("http://localhost:3001/api/getData")
-      .then(res => this.setState({ hashItems: res.data }));
+    // get JWT auth token from storage
+    let token = localStorage.getItem("token");
+    // if token exists pull the address from it and get hashes from database then set state
+    if (token) {
+      let publicAddress = this.getAddr(token);
+      axios
+        .get(`http://localhost:3001/api/getHashes${publicAddress}`, {
+          headers: { Authorization: "Bearer " + token }
+        })
+        .then(res => this.setState({ hashItems: res.data.hashes }));
+    }
   }
+
+  // get address from JWT auth token
+  getAddr = token => {
+    // split the token into 3 at each "." and select 2nd one
+    let base64Url = token.split(".")[1];
+    // re-format and parse
+    let base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    let payload = JSON.parse(window.atob(base64));
+    // return address
+    return payload.payload.address;
+  };
 
   // take text input and output the hash
   addHash = input => {
@@ -31,42 +49,63 @@ class App extends Component {
     let output = keccak256(input);
     this.setState({ output });
 
+    // fetch token from storage and retrieve address
+    let token = localStorage.getItem("token");
+    let publicAddy = this.getAddr(token);
+
     // create a hash item
     const newHashItem = {
-      //publicAddress: "0x3f040ef68e211d265a705f2066a33756c938615f",
-      hashes: {
-        id: uuid.v4(),
-        hash: output,
-        tx: null
-      }
+      publicAddress: publicAddy,
+      id: uuid.v4(),
+      hash: output,
+      tx: null
     };
-
     // post hash item to database and set the return value (all items) to state
     axios
-      .post("http://localhost:3001/api/putData", { newHashItem })
-      .then(res => this.setState({ hashItems: res.data }));
+      .post(
+        "http://localhost:3001/api/putHash",
+        { newHashItem },
+        {
+          headers: { Authorization: "Bearer " + token }
+        }
+      )
+      .then(res => this.componentDidMount());
   };
 
   // takes hash item id (id we create with uuid not database _id)
-  // and deletes from database then updates state
+  // and deletes from database then refresh state
   deleteHash = id => {
-    console.log(id);
+    // fetch token from storage and retrieve address
+    let token = localStorage.getItem("token");
+    let address = this.getAddr(token);
+
+    // create payload
+    const data = {
+      address,
+      id
+    };
+    // auth header
+    const headers = { Authorization: "Bearer " + token };
+
     axios
-      .delete(`http://localhost:3001/api/deleteData${id}`)
-      .then(res => this.setState({ hashItems: res.data }));
+      .delete(`http://localhost:3001/api/deleteHash`, {
+        headers,
+        data
+      })
+      .then(res => this.componentDidMount());
   };
 
-  // sends a hash item to the ethereum blockchain and updates db
+  // sends a hash item to the ethereum blockchain and updates database
   hashToBlock = async (output, id) => {
     // pass in contract ABI and address to create instance
     const contract = window.web3.eth.contract(HASHIFY_ABI).at(PROXY_ADDRESS);
 
-    // get first address in metamask account
-    let acct = window.web3.eth.coinbase;
-    let netId = await window.web3.version.network;
-    console.log(netId);
-    console.log("Sending from account: " + acct);
-    console.log("Hash being sent: " + output);
+    // Request account access
+    await window.ethereum.enable();
+
+    // get address and current network
+    const acct = window.ethereum.selectedAddress;
+    let netId = await window.etheruem.networkVersion;
 
     // prepend 0x to the hash as per ethereum formatting
     let formatOutput = "0x" + output;
@@ -97,7 +136,7 @@ class App extends Component {
           // TODO: fix refresh page issue and have it auto update state
           axios
             .post("http://localhost:3001/api/updateData", updateHashItem)
-            .then(res => this.setState({ hashItems: res.data }));
+            .then(res => this.setState({ hashItems: res.data.hashes }));
           setTimeout(() => {
             window.location.reload();
           }, 2000);
