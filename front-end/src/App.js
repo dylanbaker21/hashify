@@ -105,7 +105,7 @@ class App extends Component {
 
     // get address and current network
     const acct = window.ethereum.selectedAddress;
-    let netId = await window.etheruem.networkVersion;
+    let netId = await window.ethereum.networkVersion;
 
     // prepend 0x to the hash as per ethereum formatting
     let formatOutput = "0x" + output;
@@ -132,14 +132,15 @@ class App extends Component {
             tx: result
           };
 
-          // update database then set state and refresh page after 2 seconds
-          // TODO: fix refresh page issue and have it auto update state
+          let token = localStorage.getItem("token");
+
+          // update database then set state TODO: fix the need to refresh for state update
           axios
-            .post("http://localhost:3001/api/updateData", updateHashItem)
-            .then(res => this.setState({ hashItems: res.data.hashes }));
-          setTimeout(() => {
-            window.location.reload();
-          }, 2000);
+            .post("http://localhost:3001/api/addTx", updateHashItem, {
+              headers: { Authorization: "Bearer " + token }
+            })
+            .then(res => console.log(res));
+          this.componentDidMount();
         }
       });
     }
