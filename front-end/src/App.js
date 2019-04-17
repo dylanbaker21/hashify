@@ -104,7 +104,10 @@ class App extends Component {
     await window.ethereum.enable();
 
     // get address and current network
-    const acct = window.ethereum.selectedAddress;
+    let token = localStorage.getItem("token");
+    let acct = this.getAddr(token);
+
+    let selectedAddress = window.ethereum.selectedAddress;
     let netId = await window.ethereum.networkVersion;
 
     // prepend 0x to the hash as per ethereum formatting
@@ -114,6 +117,10 @@ class App extends Component {
     if (acct == null) {
       window.alert(
         'You must login to the chrome extension "metamask" to interact with the blockchain'
+      );
+    } else if (acct !== selectedAddress) {
+      window.alert(
+        `You're logged into ${acct} but have selected ${selectedAddress} in MetaMask, please select the same MetaMask address.`
       );
     } else if (netId !== "3") {
       window.alert("You must select the Ropsten test network in metamask");
@@ -131,8 +138,6 @@ class App extends Component {
             fromAddress: acct,
             tx: result
           };
-
-          let token = localStorage.getItem("token");
 
           // update database then set state TODO: fix the need to refresh for state update
           axios
