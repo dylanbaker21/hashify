@@ -48,16 +48,29 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(logger("dev"));
 
-// fetches one user's data
+// NO-AUTH: fetches one user's basic data
 router.get("/getUserData:publicAddress", (req, res) => {
   let pubAddy = req.params.publicAddress;
   db.collection("users").findOne({ publicAddress: pubAddy }, (err, data) => {
+    if (err) return res.json({ success: false, error: err });
+    else if (!data) return res.json({ address: null });
+    else return res.json({ address: data.publicAddress, nonce: data.nonce });
+  });
+});
+
+// NO-AUTH: adds new user to the database
+router.post("/addUser", (req, res) => {
+  let data = new Data();
+
+  data.publicAddress = req.body.publicAddress;
+
+  data.save(err => {
     if (err) return res.json({ success: false, error: err });
     return res.json(data);
   });
 });
 
-// fetches one users hashes
+// AUTH: fetches one users hashes
 router.get("/getHashes:publicAddress", verifyToken, (req, res) => {
   jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
     if (err) {
@@ -75,7 +88,7 @@ router.get("/getHashes:publicAddress", verifyToken, (req, res) => {
   });
 });
 
-// overwrites existing data in our database
+// AUTH: overwrites existing data in our database
 router.post("/addTx", verifyToken, (req, res) => {
   jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
     if (err) {
@@ -99,7 +112,7 @@ router.post("/addTx", verifyToken, (req, res) => {
   });
 });
 
-// this method removes existing data from the database
+// AUTH: this method removes existing data from the database
 router.delete("/deleteHash", verifyToken, (req, res) => {
   jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
     if (err) {
@@ -120,7 +133,7 @@ router.delete("/deleteHash", verifyToken, (req, res) => {
   });
 });
 
-// adds new hash to the database
+// AUTH: adds new hash to the database
 router.post("/putHash", verifyToken, (req, res) => {
   jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
     if (err) {
@@ -148,19 +161,7 @@ router.post("/putHash", verifyToken, (req, res) => {
   });
 });
 
-// adds new user to the database
-router.post("/addUser", (req, res) => {
-  let data = new Data();
-
-  data.publicAddress = req.body.publicAddress;
-
-  data.save(err => {
-    if (err) return res.json({ success: false, error: err });
-    return res.json(data);
-  });
-});
-
-// AUTHENTICATE USER
+// NO-AUTH: authenticate user
 router.post("/auth", (req, res) => {
   const pubAddy = req.body.publicAddress;
   const signature = req.body.signature;
@@ -213,6 +214,7 @@ router.post("/auth", (req, res) => {
   );
 });
 
+// AUTH: Test Route
 router.post("/test", verifyToken, (req, res) => {
   jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
     if (err) {
@@ -226,6 +228,7 @@ router.post("/test", verifyToken, (req, res) => {
   });
 });
 
+// middleware to format JWT auth token
 function verifyToken(req, res, next) {
   // get auth header value
   const bearerHeader = req.headers["authorization"];
