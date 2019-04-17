@@ -27,7 +27,7 @@ app.use(function(req, res, next) {
 
 const router = express.Router();
 
-// this is our MongoDB database
+// this is the MongoDB database
 const dbRoute = `mongodb+srv://${DB_CRED.USER}:${
   DB_CRED.PASS
 }@cluster0-zjtwu.mongodb.net/test?retryWrites=true`;
@@ -48,32 +48,22 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(logger("dev"));
 
-// fetches all available data in our database
-router.get("/getData", (req, res) => {
-  Data.find((err, data) => {
-    if (err) return res.json({ success: false, error: err });
-    return res.json(data);
-  });
-});
-
-// fetches ONE USERS DATA
-router.get("/getData:publicAddress", (req, res) => {
+// fetches one user's data
+router.get("/getUserData:publicAddress", (req, res) => {
   let pubAddy = req.params.publicAddress;
-  console.log(pubAddy);
   db.collection("users").findOne({ publicAddress: pubAddy }, (err, data) => {
     if (err) return res.json({ success: false, error: err });
     return res.json(data);
   });
 });
 
-// fetches HASHES
+// fetches one users hashes
 router.get("/getHashes:publicAddress", verifyToken, (req, res) => {
   jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
     if (err) {
       res.sendStatus(403);
     } else {
       let pubAddy = req.params.publicAddress;
-      console.log(pubAddy);
       db.collection("users").findOne(
         { publicAddress: pubAddy },
         (err, data) => {
@@ -86,31 +76,27 @@ router.get("/getHashes:publicAddress", verifyToken, (req, res) => {
 });
 
 // overwrites existing data in our database
-router.post("/updateData", (req, res) => {
-  let id1 = req.body.id;
-  let tx1 = req.body.tx;
-  let fromAddress1 = req.body.fromAddress;
-  console.log(
-    "Sent from eth address: " +
-      fromAddress1 +
-      "/n" +
-      " With id: " +
-      id1 +
-      "/n" +
-      " Eth transaction hash: " +
-      tx1
-  );
-  db.collection("datas").updateOne(
-    { id: id1 },
-    { $set: { tx: tx1, fromAddress: fromAddress1 } }
-  );
-  err => {
-    if (err) return res.json({ success: false, error: err });
-    Data.find((err, data) => {
-      if (err) return res.json({ success: false, error: err });
-      return res.json(data);
-    });
-  };
+router.post("/addTx", verifyToken, (req, res) => {
+  jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      let id1 = req.body.id;
+      let tx1 = req.body.tx;
+      let fromAddress1 = req.body.fromAddress;
+
+      db
+        .collection("users")
+        .updateOne(
+          { publicAddress: fromAddress1, "hashes.id": `${id1}` },
+          { $set: { "hashes.$.tx": tx1 } }
+        ),
+        (err, data) => {
+          if (err) return res.json({ success: false, error: err });
+          return res.json(data);
+        };
+    }
+  });
 });
 
 // this method removes existing data from the database
@@ -121,8 +107,7 @@ router.delete("/deleteHash", verifyToken, (req, res) => {
     } else {
       let hashID = req.body.id;
       let address = req.body.address;
-      console.log("Item with id to delete" + req.body.id);
-      console.log("Address" + req.body.id);
+
       db.collection("users").updateOne(
         { publicAddress: address },
         { $pull: { hashes: { id: hashID } } },
@@ -136,7 +121,6 @@ router.delete("/deleteHash", verifyToken, (req, res) => {
 });
 
 // adds new hash to the database
-// ADD NEW HASH
 router.post("/putHash", verifyToken, (req, res) => {
   jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
     if (err) {
@@ -164,29 +148,15 @@ router.post("/putHash", verifyToken, (req, res) => {
   });
 });
 
-// adds new data to the database
-// ADD NEW USER
-router.post("/putData", (req, res) => {
+// adds new user to the database
+router.post("/addUser", (req, res) => {
   let data = new Data();
-  const publicAddress = req.body.publicAddress;
-  console.log(publicAddress);
 
-  // if ((!id && id !== 0) || !hash) {
-  //   return res.json({
-  //     success: false,
-  //     error: "INVALID INPUTS"
-  //   });
-  // }
+  data.publicAddress = req.body.publicAddress;
 
-  data.publicAddress = publicAddress;
-  //data.hashes.push({ id, hash, tx: null });
   data.save(err => {
     if (err) return res.json({ success: false, error: err });
     return res.json(data);
-    // Data.find((err, data) => {
-    //   if (err) return res.json({ success: false, error: err });
-    //   return res.json(data);
-    // });
   });
 });
 
@@ -195,15 +165,8 @@ router.post("/auth", (req, res) => {
   const pubAddy = req.body.publicAddress;
   const signature = req.body.signature;
 
-  console.log(pubAddy + " " + signature);
-
-  // if ((!id && id !== 0) || !hash) {
-  //   return res.json({
-  //     success: false,
-  //     error: "INVALID INPUTS"
-  //   });
-  // }
   db.collection("users").findOneAndUpdate(
+    // find user by address and set new nonce
     { publicAddress: pubAddy },
     { $set: { nonce: Math.floor(Math.random() * 1000000) } },
     { new: true },
@@ -212,9 +175,8 @@ router.post("/auth", (req, res) => {
         return res.json({ success: false, error: err });
       } else {
         const msg = `Login key: ${data.value.nonce}`;
-        console.log(data.value.nonce);
-        // We now are in possession of msg, publicAddress and signature. We
-        // can perform an elliptic curve signature verification with ecrecover
+        // We now have msg, publicAddress and signature. We
+        // can perform signature verification
         const msgBuffer = ethUtil.toBuffer(msg);
         const msgHash = ethUtil.hashPersonalMessage(msgBuffer);
         const signatureBuffer = ethUtil.toBuffer(signature);
@@ -227,10 +189,9 @@ router.post("/auth", (req, res) => {
         );
         const addressBuffer = ethUtil.publicToAddress(publicKey);
         const address = ethUtil.bufferToHex(addressBuffer);
-        console.log(address + " " + data.value.publicAddress);
 
-        // dataSchema.nonce = Math.floor(Math.random() * 10000);
         if (err) return res.json({ success: false, error: err });
+        // if ecrecover returns matching address, issue JWT auth token
         if (address === data.value.publicAddress) {
           jwt.sign(
             { payload: { id: data.value._id, address } },
@@ -247,8 +208,6 @@ router.post("/auth", (req, res) => {
             .status(401)
             .send({ error: "Signature verification failed" });
         }
-        // The signature verification is successful if the address found with
-        // ecrecover matches the initial publicAddress
       }
     }
   );
@@ -269,18 +228,14 @@ router.post("/test", verifyToken, (req, res) => {
 
 function verifyToken(req, res, next) {
   // get auth header value
-  //console.log(req.headers);
   const bearerHeader = req.headers["authorization"];
-
   if (typeof bearerHeader !== "undefined") {
     //split token at space
     const bearer = bearerHeader.split(" ");
     //get token from array
     const bearerToken = bearer[1];
-    //console.log(bearerToken);
     //set token
     req.token = bearerToken;
-    //console.log(req.token);
     //next middleware
     next();
   } else {
