@@ -51,14 +51,14 @@ class Login extends Component {
 
   handleRegistration = async (res, publicAddress) => {
     // If account doesn't exist in database, create one then handleLogin
-    if (res.data === null) {
+    if (res.data.address === null) {
       axios
         .post(`http://localhost:3001/api/addUser`, { publicAddress })
         .then(res => this.handleLogin(res.data.publicAddress, res.data.nonce));
     }
     // If account does exist handleLogin
-    else if (res.data.publicAddress === publicAddress) {
-      this.handleLogin(res.data.publicAddress, res.data.nonce);
+    else if (res.data.address === publicAddress) {
+      this.handleLogin(res.data.address, res.data.nonce);
     }
   };
 
