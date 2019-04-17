@@ -19,7 +19,7 @@ export class AddHash extends Component {
       <form onSubmit={this.handleSubmit}>
         <h4>Keccak256 - Ethereum compatible</h4>
         <textarea
-          style={{ height: "30vh", width: "45vw", margin: "1vw" }}
+          style={textAreaStyle}
           type="text"
           name="input"
           placeholder="Enter text to hash..."
@@ -27,7 +27,7 @@ export class AddHash extends Component {
           onChange={this.handleChange}
         />
         <textarea
-          style={{ height: "30vh", width: "45vw", margin: "1vw" }}
+          style={textAreaStyle}
           type="text"
           name="output"
           placeholder="Hashed output"
@@ -38,16 +38,8 @@ export class AddHash extends Component {
         <input
           type="submit"
           value="Hash"
-          className="btn2"
-          style={{
-            border: "none",
-            backgroundColor: "#333",
-            color: "#fff",
-            height: "5vh",
-            width: "25vw",
-            cursor: "pointer",
-            margin: "1vw"
-          }}
+          //className="btn2"
+          style={hashBtnStyle}
         />
       </form>
     );
@@ -60,4 +52,24 @@ AddHash.propTypes = {
   output: PropTypes.string.isRequired
 };
 
+const textAreaStyle = {
+  height: "30vh",
+  width: "45vw",
+  margin: "10px 10px 10px 10px",
+  borderWidth: "1px",
+  borderStyle: "solid",
+  borderRadius: "5px"
+};
+
+const hashBtnStyle = {
+  border: "none",
+  borderRadius: "5px",
+  backgroundColor: "#333",
+  color: "#fff",
+  height: "5vh",
+  width: "25vw",
+  cursor: "pointer",
+  margin: "0px 10px 10px 10px",
+  fontSize: "20px"
+};
 export default AddHash;

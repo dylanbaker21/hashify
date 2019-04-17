@@ -29,12 +29,14 @@ SubmitHash.propTypes = {
 
 const submitBtnStyle = {
   border: "none",
+  borderRadius: "5px",
   backgroundColor: "#008100",
   color: "#fff",
-  height: "5vh",
-  width: "25vw",
+  display: "inline-block",
   cursor: "pointer",
-  margin: "1vw"
+  margin: "0px 0px 10px 10px",
+  padding: "10px",
+  fontSize: "14px"
 };
 
 export default SubmitHash;

@@ -1,6 +1,29 @@
-export const HASHIFY_ADDRESS = "0xB613b2E8794c2a4aeb1a6E4B802238BEC1CFBC92";
+export const PROXY_ADDRESS = "0xdF5AeE5EBd82A0ebCc1056713724ef0E106c4E41";
 
 export const HASHIFY_ABI = [
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "_index",
+        type: "uint256"
+      }
+    ],
+    name: "deleteHash",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    constant: false,
+    inputs: [],
+    name: "getHashes",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
   {
     constant: false,
     inputs: [
@@ -19,58 +42,18 @@ export const HASHIFY_ABI = [
     constant: false,
     inputs: [
       {
-        name: "_index",
-        type: "uint256"
-      }
-    ],
-    name: "deleteHash",
-    outputs: [
-      {
-        name: "hash",
-        type: "bytes32[]"
-      }
-    ],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "function"
-  },
-  {
-    inputs: [],
-    payable: false,
-    stateMutability: "nonpayable",
-    type: "constructor"
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: "getHashes",
-    outputs: [
-      {
-        name: "hash",
-        type: "bytes32[]"
-      }
-    ],
-    payable: false,
-    stateMutability: "view",
-    type: "function"
-  },
-  {
-    constant: true,
-    inputs: [
+        name: "_address",
+        type: "address"
+      },
       {
         name: "_index",
         type: "uint256"
       }
     ],
-    name: "getSpecificHash",
-    outputs: [
-      {
-        name: "hash",
-        type: "bytes32"
-      }
-    ],
+    name: "getHashInfo",
+    outputs: [],
     payable: false,
-    stateMutability: "view",
+    stateMutability: "nonpayable",
     type: "function"
   },
   {
@@ -86,5 +69,152 @@ export const HASHIFY_ABI = [
     payable: false,
     stateMutability: "view",
     type: "function"
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: "_index",
+        type: "uint256"
+      },
+      {
+        name: "v",
+        type: "uint8"
+      },
+      {
+        name: "r",
+        type: "bytes32"
+      },
+      {
+        name: "s",
+        type: "bytes32"
+      }
+    ],
+    name: "registerVerification",
+    outputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "function"
+  },
+  {
+    inputs: [],
+    payable: false,
+    stateMutability: "nonpayable",
+    type: "constructor"
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: "hash",
+        type: "bytes32"
+      },
+      {
+        indexed: true,
+        name: "index",
+        type: "uint256"
+      },
+      {
+        indexed: true,
+        name: "account",
+        type: "address"
+      }
+    ],
+    name: "HashAdded",
+    type: "event"
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: "hash",
+        type: "bytes32"
+      },
+      {
+        indexed: true,
+        name: "block",
+        type: "uint256"
+      },
+      {
+        indexed: true,
+        name: "account",
+        type: "address"
+      }
+    ],
+    name: "HashVerified",
+    type: "event"
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        name: "hashes",
+        type: "bytes32[]"
+      },
+      {
+        indexed: true,
+        name: "account",
+        type: "address"
+      }
+    ],
+    name: "HashesListed",
+    type: "event"
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: "hash",
+        type: "bytes32"
+      },
+      {
+        indexed: true,
+        name: "verified",
+        type: "bool"
+      },
+      {
+        indexed: true,
+        name: "block",
+        type: "uint256"
+      },
+      {
+        indexed: false,
+        name: "v",
+        type: "uint8"
+      },
+      {
+        indexed: false,
+        name: "r",
+        type: "bytes32"
+      },
+      {
+        indexed: false,
+        name: "s",
+        type: "bytes32"
+      }
+    ],
+    name: "HashInfo",
+    type: "event"
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: "account",
+        type: "address"
+      },
+      {
+        indexed: true,
+        name: "hash",
+        type: "bytes32"
+      }
+    ],
+    name: "HashDeleted",
+    type: "event"
   }
 ];

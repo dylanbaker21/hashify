@@ -4,6 +4,8 @@ const bodyParser = require("body-parser");
 const logger = require("morgan");
 const Data = require("./data");
 const cors = require("cors");
+const ethUtil = require("ethereumjs-util");
+const jwt = require("jsonwebtoken");
 
 const DB_CRED = require("./db");
 
@@ -25,7 +27,7 @@ app.use(function(req, res, next) {
 
 const router = express.Router();
 
-// this is our MongoDB database
+// this is the MongoDB database
 const dbRoute = `mongodb+srv://${DB_CRED.USER}:${
   DB_CRED.PASS
 }@cluster0-zjtwu.mongodb.net/test?retryWrites=true`;
@@ -46,80 +48,203 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(logger("dev"));
 
-// fetches all available data in our database
-router.get("/getData", (req, res) => {
-  Data.find((err, data) => {
+// NO-AUTH: fetches one user's basic data
+router.get("/getUserData:publicAddress", (req, res) => {
+  let pubAddy = req.params.publicAddress;
+  db.collection("users").findOne({ publicAddress: pubAddy }, (err, data) => {
+    if (err) return res.json({ success: false, error: err });
+    else if (!data) return res.json({ address: null });
+    else return res.json({ address: data.publicAddress, nonce: data.nonce });
+  });
+});
+
+// NO-AUTH: adds new user to the database
+router.post("/addUser", (req, res) => {
+  let data = new Data();
+
+  data.publicAddress = req.body.publicAddress;
+
+  data.save(err => {
     if (err) return res.json({ success: false, error: err });
     return res.json(data);
   });
 });
 
-// overwrites existing data in our database
-router.post("/updateData", (req, res) => {
-  let id1 = req.body.id;
-  let tx1 = req.body.tx;
-  let fromAddress1 = req.body.fromAddress;
-  console.log(
-    "Sent from eth address: " +
-      fromAddress1 +
-      "/n" +
-      " With id: " +
-      id1 +
-      "/n" +
-      " Eth transaction hash: " +
-      tx1
-  );
-  db.collection("datas").updateOne(
-    { id: id1 },
-    { $set: { tx: tx1, fromAddress: fromAddress1 } }
-  );
-  err => {
-    if (err) return res.json({ success: false, error: err });
-    Data.find((err, data) => {
-      if (err) return res.json({ success: false, error: err });
-      return res.json(data);
-    });
-  };
-});
-
-// this method removes existing data from the database
-router.delete("/deleteData:id", (req, res) => {
-  let id2 = req.params.id;
-  console.log("Item with id to delete: " + id2);
-  Data.findOneAndDelete({ id: id2 }, err => {
-    if (err) return res.send(err);
-    Data.find((err, data) => {
-      if (err) return res.json({ success: false, error: err });
-      return res.json(data);
-    });
+// AUTH: fetches one users hashes
+router.get("/getHashes:publicAddress", verifyToken, (req, res) => {
+  jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      let pubAddy = req.params.publicAddress;
+      db.collection("users").findOne(
+        { publicAddress: pubAddy },
+        (err, data) => {
+          if (err) return res.json({ success: false, error: err });
+          return res.json(data);
+        }
+      );
+    }
   });
 });
 
-// adds new data to the database
-router.post("/putData", (req, res) => {
-  let data = new Data();
+// AUTH: overwrites existing data in our database
+router.post("/addTx", verifyToken, (req, res) => {
+  jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      let id1 = req.body.id;
+      let tx1 = req.body.tx;
+      let fromAddress1 = req.body.fromAddress;
 
-  const { id, fromAddress, hash, tx } = req.body.newHashItem;
+      db
+        .collection("users")
+        .updateOne(
+          { publicAddress: fromAddress1, "hashes.id": `${id1}` },
+          { $set: { "hashes.$.tx": tx1 } }
+        ),
+        (err, data) => {
+          if (err) return res.json({ success: false, error: err });
+          return res.json(data);
+        };
+    }
+  });
+});
 
-  if ((!id && id !== 0) || !hash) {
-    return res.json({
-      success: false,
-      error: "INVALID INPUTS"
-    });
+// AUTH: this method removes existing data from the database
+router.delete("/deleteHash", verifyToken, (req, res) => {
+  jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      let hashID = req.body.id;
+      let address = req.body.address;
+
+      db.collection("users").updateOne(
+        { publicAddress: address },
+        { $pull: { hashes: { id: hashID } } },
+        (err, data) => {
+          if (err) return res.json({ success: false, error: err });
+          return res.json(data);
+        }
+      );
+    }
+  });
+});
+
+// AUTH: adds new hash to the database
+router.post("/putHash", verifyToken, (req, res) => {
+  jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      pubAddy = req.body.newHashItem.publicAddress;
+      hash = req.body.newHashItem.hash;
+      id = req.body.newHashItem.id;
+
+      console.log(pubAddy + " " + hash + " " + id);
+
+      db.collection("users").findOneAndUpdate(
+        { publicAddress: pubAddy },
+        { $push: { hashes: { id, hash, tx: null } } },
+        { new: true },
+        (err, data) => {
+          if (err) {
+            return res.json({ success: false, error: err });
+          } else {
+            return res.json(data);
+          }
+        }
+      );
+    }
+  });
+});
+
+// NO-AUTH: authenticate user
+router.post("/auth", (req, res) => {
+  const pubAddy = req.body.publicAddress;
+  const signature = req.body.signature;
+
+  db.collection("users").findOneAndUpdate(
+    // find user by address and set new nonce
+    { publicAddress: pubAddy },
+    { $set: { nonce: Math.floor(Math.random() * 1000000) } },
+    { new: true },
+    (err, data) => {
+      if (err) {
+        return res.json({ success: false, error: err });
+      } else {
+        const msg = `Login key: ${data.value.nonce}`;
+        // We now have msg, publicAddress and signature. We
+        // can perform signature verification
+        const msgBuffer = ethUtil.toBuffer(msg);
+        const msgHash = ethUtil.hashPersonalMessage(msgBuffer);
+        const signatureBuffer = ethUtil.toBuffer(signature);
+        const signatureParams = ethUtil.fromRpcSig(signatureBuffer);
+        const publicKey = ethUtil.ecrecover(
+          msgHash,
+          signatureParams.v,
+          signatureParams.r,
+          signatureParams.s
+        );
+        const addressBuffer = ethUtil.publicToAddress(publicKey);
+        const address = ethUtil.bufferToHex(addressBuffer);
+
+        if (err) return res.json({ success: false, error: err });
+        // if ecrecover returns matching address, issue JWT auth token
+        if (address === data.value.publicAddress) {
+          jwt.sign(
+            { payload: { id: data.value._id, address } },
+            DB_CRED.JWT_SECRET,
+            (err, token) => {
+              if (err) {
+                return res.json(err);
+              }
+              return res.json(token);
+            }
+          );
+        } else {
+          return res
+            .status(401)
+            .send({ error: "Signature verification failed" });
+        }
+      }
+    }
+  );
+});
+
+// AUTH: Test Route
+router.post("/test", verifyToken, (req, res) => {
+  jwt.verify(req.token, DB_CRED.JWT_SECRET, (err, authData) => {
+    if (err) {
+      res.sendStatus(403);
+    } else {
+      res.json({
+        message: "SUCCESS :)",
+        authData
+      });
+    }
+  });
+});
+
+// middleware to format JWT auth token
+function verifyToken(req, res, next) {
+  // get auth header value
+  const bearerHeader = req.headers["authorization"];
+  if (typeof bearerHeader !== "undefined") {
+    //split token at space
+    const bearer = bearerHeader.split(" ");
+    //get token from array
+    const bearerToken = bearer[1];
+    //set token
+    req.token = bearerToken;
+    //next middleware
+    next();
+  } else {
+    res.sendStatus(403);
   }
-
-  data.hash = hash;
-  data.id = id;
-  data.fromAddress = fromAddress;
-  data.tx = tx;
-  data.save(err => {
-    if (err) return res.json({ success: false, error: err });
-    Data.find((err, data) => {
-      if (err) return res.json({ success: false, error: err });
-      return res.json(data);
-    });
-  });
-});
+}
 
 // append /api for our http requests
 app.use("/api", router);
