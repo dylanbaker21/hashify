@@ -139,11 +139,9 @@ router.post("/putHash", verifyToken, (req, res) => {
     if (err) {
       res.sendStatus(403);
     } else {
-      pubAddy = req.body.newHashItem.publicAddress;
-      hash = req.body.newHashItem.hash;
-      id = req.body.newHashItem.id;
-
-      console.log(pubAddy + " " + hash + " " + id);
+      const pubAddy = req.body.newHashItem.publicAddress;
+      const hash = req.body.newHashItem.hash;
+      const id = req.body.newHashItem.id;
 
       db.collection("users").findOneAndUpdate(
         { publicAddress: pubAddy },

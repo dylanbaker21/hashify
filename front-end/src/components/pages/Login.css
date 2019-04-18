@@ -18,8 +18,8 @@
 .content {
   color: #fff;
   position: relative;
-  top: 25%;
-  font-size: 1.2em;
+  top: 33%;
+  font-size: 1.4em;
 }
 
 .loginButton {
@@ -32,12 +32,12 @@
   font-size: 20px;
 }
 
-.metamask {
+.loginMetamask {
   height: auto;
   width: 200px;
   position: absolute;
   left: 5%;
-  top: 3%;
+  top: 5%;
 }
 
 @media screen and (max-width: 600px) {

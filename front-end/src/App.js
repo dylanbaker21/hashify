@@ -34,13 +34,15 @@ class App extends Component {
 
   // get address from JWT auth token
   getAddr = token => {
-    // split the token into 3 at each "." and select 2nd one
-    let base64Url = token.split(".")[1];
-    // re-format and parse
-    let base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    let payload = JSON.parse(window.atob(base64));
-    // return address
-    return payload.payload.address;
+    if (token) {
+      // split the token into 3 at each "." and select 2nd one
+      let base64Url = token.split(".")[1];
+      // re-format and parse
+      let base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+      let payload = JSON.parse(window.atob(base64));
+      // return address
+      return payload.payload.address;
+    }
   };
 
   // take text input and output the hash
@@ -161,7 +163,7 @@ class App extends Component {
                 path="/home"
                 render={props => (
                   <React.Fragment>
-                    <Header />
+                    <Header getAddr={this.getAddr} />
                     <AddHashes
                       addHash={this.addHash}
                       output={this.state.output}

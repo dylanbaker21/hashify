@@ -93,7 +93,7 @@ class Login extends Component {
             <img
               src={MetaMaskPic}
               alt={"Click here to download metamask"}
-              className={"metamask"}
+              className={"loginMetamask"}
             />
           </a>
           <div className="content">
