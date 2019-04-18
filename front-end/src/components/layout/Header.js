@@ -35,7 +35,7 @@ const Header = props => {
 
 // PropTypes
 Header.propTypes = {
-  getAddr: PropTypes.func.isRequired
+  getAddr: PropTypes.func
 };
 
 export default Header;

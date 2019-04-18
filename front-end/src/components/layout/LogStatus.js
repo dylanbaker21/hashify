@@ -53,7 +53,7 @@ const logInButton = {
 
 // PropTypes
 LogStatus.propTypes = {
-  getAddr: PropTypes.func.isRequired
+  getAddr: PropTypes.func
 };
 
 export default LogStatus;
