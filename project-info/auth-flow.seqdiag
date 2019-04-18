@@ -1,0 +1,19 @@
+title: Login, Registration & Authentication Sequence
+
+note over Client: Press Login Button
+Client->MetaMask: Ask to connect (EIP-1102)
+MetaMask-->Client: Get user permission
+note over Client: Accept connection
+Client->MetaMask: Permission granted
+MetaMask-->Client: Expose addresses
+Client->Server: Check DB for selected MM address
+note over Server: If no account in db, create one
+Server-->Client: Return account info
+note over Client: Sign message
+Client->Server: Send signature to auth route
+Server->Server: Verify signature
+note over Server: Signatures match
+Server->Server: Sign JWT/change nonce
+Server-->Client: Return token
+Client->Client: Store token
+Client->Client: Redirect to home page
