@@ -1,0 +1,19 @@
+title: Add Hash Flow
+
+note over Client: Enter text and press hash button
+Client->Server: Send hash info
+note over Server: Store in DB
+Server-->Client: Updated state
+note over Client: Press send to blockchain button
+Client->Client: Instantiate proxy
+Client->MetaMask: Ask to connect (EIP-1102)
+MetaMask-->Client: Expose addresses
+Client->Client: Get logged in address from JWT token
+Client->Client: Ensure logged in === MM  address
+Client->MetaMask: Create contract transaction
+MetaMask-->Client: Get user signature
+note over Client: Sign tx
+note over MetaMask: Submit tx to chain
+MetaMask-->Client: Return tx hash
+Client->Server: Update db entry with tx hash
+Client->Client: Update state to reflect tx
