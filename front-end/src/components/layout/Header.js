@@ -1,39 +1,41 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import PropTypes from "prop-types";
 
+import LogStatus from "./LogStatus";
 import MetaMaskPic from "../../public/download-metamask-dark.png";
 import "./Header.css";
 
-export default function Header() {
+const Header = props => {
   return (
-    <header style={headerStyle}>
-      <a href={"https://www.metamask.io"} target={"_blank"}>
-        <img
-          src={MetaMaskPic}
-          alt={"Click here to download metamask"}
-          className={"metamask"}
-        />
-      </a>
-      <h1>Hashify</h1>
-      <Link style={linkStyle} to="/home">
-        Home
-      </Link>{" "}
-      |{" "}
-      <Link style={linkStyle} to="/about">
-        About
-      </Link>
+    <header className={"header"}>
+      <div className={"metamaskDiv"}>
+        <a href={"https://www.metamask.io"} target={"_blank"}>
+          <img
+            src={MetaMaskPic}
+            alt={"Click here to download metamask"}
+            className={"metamask"}
+          />
+        </a>
+      </div>
+      <div className={"headerText"}>
+        <h1>Hashify</h1>
+        <Link className={"linkStyle"} to="/home">
+          Home
+        </Link>{" "}
+        |{" "}
+        <Link className={"linkStyle"} to="/about">
+          About
+        </Link>
+      </div>
+      <LogStatus getAddr={props.getAddr} />
     </header>
   );
-}
-
-const headerStyle = {
-  background: "#333",
-  color: "#fff",
-  textAlign: "center",
-  padding: "10px"
 };
 
-const linkStyle = {
-  color: "#fff",
-  textDecoration: "none"
+// PropTypes
+Header.propTypes = {
+  getAddr: PropTypes.func.isRequired
 };
+
+export default Header;
