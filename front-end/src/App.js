@@ -141,13 +141,15 @@ class App extends Component {
             tx: result
           };
 
+          setTimeout(() => {
+            this.componentDidMount();
+          }, 3000);
           // update database then set state TODO: fix the need to refresh for state update
           axios
             .post("http://3.18.111.214:3001/api/addTx", updateHashItem, {
               headers: { Authorization: "Bearer " + token }
             })
             .then(res => console.log(res));
-          this.componentDidMount();
         }
       });
     }
