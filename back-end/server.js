@@ -226,6 +226,14 @@ router.post("/test", verifyToken, (req, res) => {
   });
 });
 
+// NO-AUTH: Test Route
+router.get("/test", (req, res) => {
+  console.log("ayyyyy");
+  res.json({
+    message: "SUCCESS :)"
+  });
+});
+
 // middleware to format JWT auth token
 function verifyToken(req, res, next) {
   // get auth header value

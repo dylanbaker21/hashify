@@ -25,7 +25,7 @@ class App extends Component {
     if (token) {
       let publicAddress = this.getAddr(token);
       axios
-        .get(`http://localhost:3001/api/getHashes${publicAddress}`, {
+        .get(`http://3.18.111.214:3001/api/getHashes${publicAddress}`, {
           headers: { Authorization: "Bearer " + token }
         })
         .then(res => this.setState({ hashItems: res.data.hashes }));
@@ -65,7 +65,7 @@ class App extends Component {
     // post hash item to database and set the return value (all items) to state
     axios
       .post(
-        "http://localhost:3001/api/putHash",
+        "http://3.18.111.214:3001/api/putHash",
         { newHashItem },
         {
           headers: { Authorization: "Bearer " + token }
@@ -90,7 +90,7 @@ class App extends Component {
     const headers = { Authorization: "Bearer " + token };
 
     axios
-      .delete(`http://localhost:3001/api/deleteHash`, {
+      .delete(`http://3.18.111.214:3001/api/deleteHash`, {
         headers,
         data
       })
@@ -143,7 +143,7 @@ class App extends Component {
 
           // update database then set state TODO: fix the need to refresh for state update
           axios
-            .post("http://localhost:3001/api/addTx", updateHashItem, {
+            .post("http://3.18.111.214:3001/api/addTx", updateHashItem, {
               headers: { Authorization: "Bearer " + token }
             })
             .then(res => console.log(res));
