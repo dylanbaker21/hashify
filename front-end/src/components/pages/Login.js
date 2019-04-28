@@ -53,7 +53,7 @@ class Login extends Component {
     // If account doesn't exist in database, create one then handleLogin
     if (res.data.address === null) {
       axios
-        .post(`http://3.18.111.214:3001/addUser`, { publicAddress })
+        .post(`http://3.18.111.214:3001/api/addUser`, { publicAddress })
         .then(res => this.handleLogin(res.data.publicAddress, res.data.nonce));
     }
     // If account does exist handleLogin
@@ -74,7 +74,7 @@ class Login extends Component {
         // Send signature to backend for verification and authentication
         else {
           axios
-            .post(`http://3.18.111.214:3001/auth`, {
+            .post(`http://3.18.111.214:3001/api/auth`, {
               publicAddress,
               signature
             })
