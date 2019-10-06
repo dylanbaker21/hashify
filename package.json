@@ -32,7 +32,7 @@
     "test": "react-scripts test",
     "start": "concurrently \"cd back-end && nodemon server.js\" \"npm run machine-start\"",
     "machine-start": "cd front-end && npm run start",
-    "build": "react-scripts build",
+    "build": "cd front-end && react-scripts build",
     "eject": "react-scripts eject",
     "lint": "eslint --ext .js ./"
   },

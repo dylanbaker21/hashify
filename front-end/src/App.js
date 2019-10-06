@@ -141,13 +141,15 @@ class App extends Component {
             tx: result
           };
 
+          setTimeout(() => {
+            this.componentDidMount();
+          }, 3000);
           // update database then set state TODO: fix the need to refresh for state update
           axios
             .post("http://localhost:3001/api/addTx", updateHashItem, {
               headers: { Authorization: "Bearer " + token }
             })
             .then(res => console.log(res));
-          this.componentDidMount();
         }
       });
     }
@@ -178,7 +180,15 @@ class App extends Component {
                 )}
               />
               <Route exact path="/" component={Login} />
-              <Route path="/about" component={About} />
+              <Route
+                path="/about"
+                render={props => (
+                  <React.Fragment>
+                    <Header getAddr={this.getAddr} />
+                    <About />
+                  </React.Fragment>
+                )}
+              />
               <Route component={Page404} />
             </Switch>
           </div>
