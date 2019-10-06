@@ -25,7 +25,7 @@ class App extends Component {
     if (token) {
       let publicAddress = this.getAddr(token);
       axios
-        .get(`http://3.18.111.214:3001/api/getHashes${publicAddress}`, {
+        .get(`http://localhost:3001/api/getHashes${publicAddress}`, {
           headers: { Authorization: "Bearer " + token }
         })
         .then(res => this.setState({ hashItems: res.data.hashes }));
@@ -65,7 +65,7 @@ class App extends Component {
     // post hash item to database and set the return value (all items) to state
     axios
       .post(
-        "http://3.18.111.214:3001/api/putHash",
+        "http://localhost:3001/api/putHash",
         { newHashItem },
         {
           headers: { Authorization: "Bearer " + token }
@@ -90,7 +90,7 @@ class App extends Component {
     const headers = { Authorization: "Bearer " + token };
 
     axios
-      .delete(`http://3.18.111.214:3001/api/deleteHash`, {
+      .delete(`http://localhost:3001/api/deleteHash`, {
         headers,
         data
       })
@@ -146,7 +146,7 @@ class App extends Component {
           }, 3000);
           // update database then set state TODO: fix the need to refresh for state update
           axios
-            .post("http://3.18.111.214:3001/api/addTx", updateHashItem, {
+            .post("http://localhost:3001/api/addTx", updateHashItem, {
               headers: { Authorization: "Bearer " + token }
             })
             .then(res => console.log(res));
@@ -180,7 +180,15 @@ class App extends Component {
                 )}
               />
               <Route exact path="/" component={Login} />
-              <Route path="/about" component={About} />
+              <Route
+                path="/about"
+                render={props => (
+                  <React.Fragment>
+                    <Header getAddr={this.getAddr} />
+                    <About />
+                  </React.Fragment>
+                )}
+              />
               <Route component={Page404} />
             </Switch>
           </div>
