@@ -2,6 +2,7 @@
 
 # dependencies
 babel-loader
+*/node_modules
 /node_modules
 /.pnp
 .pnp.js
@@ -11,6 +12,7 @@ babel-loader
 
 # production
 /build
+*/build
 
 # misc
 db.js
